@@ -1,0 +1,1228 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Sentinel</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    background: #080d18;
+    color: #e8edf7;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Floating background */
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.18;
+    z-index: -1;
+    animation: float 12s infinite alternate ease-in-out;
+}
+
+body::before {
+    background: #00aaff;
+    top: -150px;
+    left: -100px;
+}
+
+body::after {
+    background: #00ff99;
+    bottom: -150px;
+    right: -100px;
+    animation-delay: 3s;
+}
+
+@keyframes float {
+    from {
+        transform: translate(0, 0);
+    }
+    to {
+        transform: translate(100px, 80px);
+    }
+}
+
+/* Floating particles */
+.particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    background: #00d9ff;
+    border-radius: 50%;
+    opacity: 0.5;
+    z-index: -1;
+    animation: rise 12s linear infinite;
+}
+
+@keyframes rise {
+    0% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+/* Layout */
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 240px;
+    background: rgba(12, 18, 32, 0.92);
+    border-right: 1px solid #1c2b40;
+    padding: 25px 18px;
+    position: fixed;
+    height: 100vh;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 35px;
+}
+
+.logo span {
+    color: #00d9ff;
+}
+
+.menu-title {
+    color: #68788f;
+    font-size: 11px;
+    margin: 20px 10px;
+    letter-spacing: 2px;
+}
+
+.nav {
+    display: block;
+    text-decoration: none;
+    color: #94a3b8;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 7px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.nav:hover,
+.nav.active {
+    background: #14243a;
+    color: #00d9ff;
+}
+
+.main {
+    margin-left: 240px;
+    padding: 30px;
+    width: calc(100% - 240px);
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.topbar h1 {
+    font-size: 26px;
+}
+
+.topbar p {
+    color: #8291a8;
+    margin-top: 5px;
+}
+
+.live {
+    color: #00ff99;
+    background: #10271f;
+    border: 1px solid #174b35;
+    padding: 9px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+/* Cards */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: rgba(16, 25, 42, 0.85);
+    border: 1px solid #203047;
+    border-radius: 13px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+
+.card:hover {
+    border-color: #00bcd4;
+    transform: translateY(-3px);
+}
+
+.stat-label {
+    color: #8a9ab2;
+    font-size: 13px;
+}
+
+.stat-value {
+    font-size: 30px;
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.stat-icon {
+    font-size: 23px;
+    margin-bottom: 15px;
+}
+
+/* Section */
+.section {
+    margin-top: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    gap: 10px;
+}
+
+.section-header h2 {
+    font-size: 19px;
+}
+
+/* Buttons */
+button {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.primary {
+    background: #00bcd4;
+    color: #07111c;
+}
+
+.primary:hover {
+    background: #40e5f5;
+}
+
+.secondary {
+    background: #18263a;
+    color: #cbd5e1;
+    border: 1px solid #293d55;
+}
+
+.secondary:hover {
+    background: #22344b;
+}
+
+.danger {
+    background: #3a1720;
+    color: #ff8b9b;
+    border: 1px solid #632535;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* API Cards */
+.api-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.api-card {
+    background: rgba(16, 25, 42, 0.9);
+    border: 1px solid #203047;
+    border-radius: 13px;
+    padding: 20px;
+}
+
+.api-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.api-name {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.status.unknown {
+    background: #2a3342;
+    color: #aab8cb;
+}
+
+.status.up {
+    background: #123327;
+    color: #00ff99;
+}
+
+.status.down {
+    background: #3a1720;
+    color: #ff687f;
+}
+
+.api-url {
+    color: #72849e;
+    font-size: 12px;
+    margin-top: 12px;
+    word-break: break-all;
+}
+
+.api-description {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.api-details {
+    display: flex;
+    gap: 15px;
+    margin-top: 18px;
+    font-size: 12px;
+    color: #9bacbf;
+}
+
+.api-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #203047;
+    font-size: 13px;
+}
+
+th {
+    color: #71849d;
+    font-weight: 500;
+}
+
+td {
+    color: #cbd5e1;
+}
+
+.empty {
+    text-align: center;
+    padding: 35px;
+    color: #708198;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+}
+
+.modal-box {
+    background: #111c2e;
+    border: 1px solid #263a52;
+    width: 450px;
+    max-width: 100%;
+    padding: 25px;
+    border-radius: 15px;
+}
+
+.modal-box h2 {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 11px;
+    background: #08111e;
+    border: 1px solid #293c53;
+    color: white;
+    border-radius: 7px;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #00bcd4;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.message {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #00ff99;
+}
+
+/* Alerts */
+.alert-item {
+    border-left: 3px solid #ff526d;
+    padding: 13px;
+    background: #171c2a;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.alert-item p {
+    font-size: 13px;
+}
+
+.alert-item small {
+    color: #71849d;
+    display: block;
+    margin-top: 6px;
+}
+
+/* Responsive */
+@media(max-width: 1000px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .api-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 650px) {
+    .sidebar {
+        width: 65px;
+        padding: 15px 8px;
+    }
+
+    .logo {
+        font-size: 15px;
+        text-align: center;
+    }
+
+    .logo span {
+        display: none;
+    }
+
+    .menu-title {
+        display: none;
+    }
+
+    .nav {
+        text-align: center;
+        font-size: 0;
+        padding: 14px 5px;
+    }
+
+    .nav::first-letter {
+        font-size: 18px;
+    }
+
+    .main {
+        margin-left: 65px;
+        width: calc(100% - 65px);
+        padding: 18px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .topbar h1 {
+        font-size: 20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Background particles -->
+<div id="particles"></div>
+
+<div class="container">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+
+    <div class="logo">🛡️ API <span>SENTINEL</span></div>
+
+    <div class="menu-title">MAIN MENU</div>
+
+    <a class="nav active" onclick="showSection('dashboard')">
+        ◈ Dashboard
+    </a>
+
+    <a class="nav" onclick="showSection('services')">
+        ◉ API Services
+    </a>
+
+    <a class="nav" onclick="showSection('logs')">
+        ▤ Request Logs
+    </a>
+
+    <a class="nav" onclick="showSection('alerts')">
+        ⚠ Alerts
+    </a>
+
+    <div class="menu-title">SYSTEM</div>
+
+    <a class="nav" onclick="refreshDashboard()">
+        ↻ Refresh
+    </a>
+
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+    <header class="topbar">
+        <div>
+            <h1 id="page-title">Dashboard</h1>
+            <p>API Gateway Monitoring System</p>
+        </div>
+
+        <div class="live">
+            ● SYSTEM ONLINE
+        </div>
+    </header>
+
+    <!-- Dashboard section -->
+    <section id="dashboard">
+
+        <div class="stats">
+
+            <div class="card">
+                <div class="stat-icon">🌐</div>
+                <div class="stat-label">Total APIs</div>
+                <div class="stat-value" id="total-apis">0</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-icon">🟢</div>
+                <div class="stat-label">Active APIs</div>
+                <div class="stat-value" id="active-apis">0</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-label">Unresolved Alerts</div>
+                <div class="stat-value" id="total-alerts">0</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-label">Average Response</div>
+                <div class="stat-value" id="avg-response">0 ms</div>
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <div class="section-header">
+                <h2>Monitored APIs</h2>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="secondary" onclick="checkAll()">
+                        ⚡ Check All
+                    </button>
+
+                    <button class="primary" onclick="openModal()">
+                        + Add API
+                    </button>
+                </div>
+            </div>
+
+            <div class="api-grid" id="api-grid">
+                <div class="card empty">Loading APIs...</div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- API services -->
+    <section id="services" style="display:none">
+
+        <div class="section-header">
+            <h2>API Services</h2>
+
+            <button class="primary" onclick="openModal()">
+                + Register API
+            </button>
+        </div>
+
+        <div class="api-grid" id="services-grid"></div>
+
+    </section>
+
+    <!-- Logs -->
+    <section id="logs" style="display:none">
+
+        <div class="section-header">
+            <h2>Recent Request Logs</h2>
+
+            <button class="secondary" onclick="loadLogs()">
+                ↻ Refresh Logs
+            </button>
+        </div>
+
+        <div class="card table-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>API</th>
+                        <th>Status Code</th>
+                        <th>Response Time</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+
+                <tbody id="logs-table"></tbody>
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- Alerts -->
+    <section id="alerts" style="display:none">
+
+        <div class="section-header">
+            <h2>System Alerts</h2>
+
+            <button class="secondary" onclick="loadAlerts()">
+                ↻ Refresh
+            </button>
+        </div>
+
+        <div id="alerts-list"></div>
+
+    </section>
+
+</main>
+</div>
+
+<!-- Add API Modal -->
+<div class="modal" id="api-modal">
+
+    <div class="modal-box">
+
+        <h2>Register New API</h2>
+
+        <form id="api-form">
+
+            <div class="form-group">
+                <label>API Name</label>
+                <input type="text" id="api-name"
+                       placeholder="Example: JSONPlaceholder"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>Endpoint URL</label>
+                <input type="url" id="api-url"
+                       placeholder="https://example.com/api"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>HTTP Method</label>
+                <select id="api-method">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PUT</option>
+                    <option>DELETE</option>
+                    <option>PATCH</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="api-description"
+                          rows="3"
+                          placeholder="API description"></textarea>
+            </div>
+
+            <div class="modal-actions">
+
+                <button type="button" class="secondary"
+                        onclick="closeModal()">
+                    Cancel
+                </button>
+
+                <button type="submit" class="primary">
+                    Register API
+                </button>
+
+            </div>
+
+            <div id="form-message" class="message"></div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+// Floating particles
+for (let i = 0; i < 30; i++) {
+
+    let particle = document.createElement("div");
+
+    particle.className = "particle";
+
+    particle.style.left = Math.random() * 100 + "%";
+
+    particle.style.animationDuration =
+        (8 + Math.random() * 15) + "s";
+
+    particle.style.animationDelay =
+        Math.random() * 10 + "s";
+
+    particle.style.width =
+        (2 + Math.random() * 4) + "px";
+
+    particle.style.height = particle.style.width;
+
+    document.getElementById("particles")
+        .appendChild(particle);
+}
+
+
+// Navigation
+function showSection(section) {
+
+    const sections = [
+        "dashboard",
+        "services",
+        "logs",
+        "alerts"
+    ];
+
+    sections.forEach(id => {
+        document.getElementById(id).style.display =
+            id === section ? "block" : "none";
+    });
+
+    document.querySelectorAll(".nav").forEach(nav => {
+        nav.classList.remove("active");
+    });
+
+    event.currentTarget.classList.add("active");
+
+    const titles = {
+        dashboard: "Dashboard",
+        services: "API Services",
+        logs: "Request Logs",
+        alerts: "System Alerts"
+    };
+
+    document.getElementById("page-title").innerText =
+        titles[section];
+
+    if (section === "logs") loadLogs();
+    if (section === "alerts") loadAlerts();
+}
+
+
+// Load dashboard statistics
+async function loadStats() {
+
+    try {
+
+        const response = await fetch("/api/stats");
+
+        const data = await response.json();
+
+        document.getElementById("total-apis").innerText =
+            data.total_apis;
+
+        document.getElementById("active-apis").innerText =
+            data.active_apis;
+
+        document.getElementById("total-alerts").innerText =
+            data.unresolved_alerts;
+
+        document.getElementById("avg-response").innerText =
+            data.average_response_time + " ms";
+
+    } catch (error) {
+
+        console.error("Stats error:", error);
+
+    }
+}
+
+
+// Load API cards
+async function loadServices() {
+
+    try {
+
+        const response = await fetch("/api/services");
+
+        const services = await response.json();
+
+        const grid = document.getElementById("api-grid");
+
+        const serviceGrid = document.getElementById("services-grid");
+
+        if (services.length === 0) {
+
+            grid.innerHTML =
+                '<div class="card empty">No APIs registered. Click Add API to begin.</div>';
+
+            serviceGrid.innerHTML =
+                '<div class="card empty">No APIs registered.</div>';
+
+            return;
+        }
+
+        let html = "";
+
+        services.forEach(api => {
+
+            html += `
+                <div class="api-card">
+
+                    <div class="api-top">
+
+                        <div class="api-name">
+                            🌐 ${escapeHTML(api.api_name)}
+                        </div>
+
+                        <span class="status unknown"
+                              id="status-${api.api_id}">
+                            NOT CHECKED
+                        </span>
+
+                    </div>
+
+                    <div class="api-url">
+                        ${escapeHTML(api.endpoint_url)}
+                    </div>
+
+                    <div class="api-description">
+                        ${escapeHTML(api.description || "No description")}
+                    </div>
+
+                    <div class="api-details">
+                        <span>Method: ${escapeHTML(api.http_method)}</span>
+                        <span>ID: ${api.api_id}</span>
+                    </div>
+
+                    <div class="api-actions">
+
+                        <button class="primary"
+                                onclick="checkAPI(${api.api_id})">
+                            ▶ Check API
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+        });
+
+        grid.innerHTML = html;
+
+        serviceGrid.innerHTML = html;
+
+    } catch (error) {
+
+        document.getElementById("api-grid").innerHTML =
+            '<div class="card empty">Unable to load APIs. Check the server.</div>';
+
+        console.error(error);
+
+    }
+}
+
+
+// Check one API
+async function checkAPI(id) {
+
+    const badge = document.getElementById("status-" + id);
+
+    if (badge) {
+        badge.innerText = "CHECKING...";
+        badge.className = "status unknown";
+    }
+
+    try {
+
+        const response = await fetch(`/api/check/${id}`, {
+            method: "POST"
+        });
+
+        const data = await response.json();
+
+        if (badge) {
+
+            badge.innerText = data.status;
+
+            badge.className =
+                "status " + data.status.toLowerCase();
+
+        }
+
+        await loadStats();
+
+        await loadLogs();
+
+        await loadAlerts();
+
+        alert(
+            `${data.api_name}\n` +
+            `Status: ${data.status}\n` +
+            `HTTP Code: ${data.status_code}\n` +
+            `Response Time: ${data.response_time_ms} ms`
+        );
+
+    } catch (error) {
+
+        if (badge) {
+            badge.innerText = "ERROR";
+            badge.className = "status down";
+        }
+
+        alert("Unable to check API. Is Flask running?");
+
+    }
+
+}
+
+
+// Check all APIs
+async function checkAll() {
+
+    const button = document.querySelector(
+        ".section-header button.secondary"
+    );
+
+    try {
+
+        button.disabled = true;
+        button.innerText = "Checking...";
+
+        const response = await fetch("/api/check-all", {
+            method: "POST"
+        });
+
+        const results = await response.json();
+
+        let message = "Monitoring Results\n\n";
+
+        results.forEach(result => {
+
+            message +=
+                `${result.api_name}: ${result.status} ` +
+                `(${result.response_time_ms} ms)\n`;
+
+        });
+
+        alert(message);
+
+        await refreshDashboard();
+
+    } catch (error) {
+
+        alert("Monitoring failed. Check Flask server.");
+
+    } finally {
+
+        button.disabled = false;
+        button.innerText = "⚡ Check All";
+
+    }
+
+}
+
+
+// Logs
+async function loadLogs() {
+
+    try {
+
+        const response = await fetch("/api/logs");
+
+        const logs = await response.json();
+
+        const table = document.getElementById("logs-table");
+
+        if (logs.length === 0) {
+
+            table.innerHTML =
+                '<tr><td colspan="4" class="empty">No logs yet.</td></tr>';
+
+            return;
+
+        }
+
+        table.innerHTML = logs.map(log => `
+
+            <tr>
+
+                <td>${escapeHTML(log.api_name)}</td>
+
+                <td>
+                    ${log.status_code === 0
+                        ? "FAILED"
+                        : log.status_code}
+                </td>
+
+                <td>${log.response_time_ms} ms</td>
+
+                <td>${escapeHTML(log.request_timestamp)}</td>
+
+            </tr>
+
+        `).join("");
+
+    } catch (error) {
+
+        console.error("Log error:", error);
+
+    }
+
+}
+
+
+// Alerts
+async function loadAlerts() {
+
+    try {
+
+        const response = await fetch("/api/alerts");
+
+        const alerts = await response.json();
+
+        const container = document.getElementById("alerts-list");
+
+        if (alerts.length === 0) {
+
+            container.innerHTML =
+                '<div class="card empty">No alerts generated.</div>';
+
+            return;
+
+        }
+
+        container.innerHTML = alerts.map(alert => `
+
+            <div class="alert-item">
+
+                <p>⚠️ ${escapeHTML(alert.message)}</p>
+
+                <small>
+                    ${escapeHTML(alert.severity)} |
+                    ${escapeHTML(alert.created_at)}
+                </small>
+
+            </div>
+
+        `).join("");
+
+    } catch (error) {
+
+        console.error("Alert error:", error);
+
+    }
+
+}
+
+
+// Refresh everything
+async function refreshDashboard() {
+
+    await loadStats();
+
+    await loadServices();
+
+    await loadLogs();
+
+    await loadAlerts();
+
+}
+
+
+// Modal
+function openModal() {
+
+    document.getElementById("api-modal").style.display =
+        "flex";
+
+}
+
+function closeModal() {
+
+    document.getElementById("api-modal").style.display =
+        "none";
+
+    document.getElementById("api-form").reset();
+
+    document.getElementById("form-message").innerText = "";
+
+}
+
+
+// Register API
+document.getElementById("api-form")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const data = {
+
+        api_name:
+            document.getElementById("api-name").value,
+
+        endpoint_url:
+            document.getElementById("api-url").value,
+
+        http_method:
+            document.getElementById("api-method").value,
+
+        description:
+            document.getElementById("api-description").value
+
+    };
+
+    try {
+
+        const response = await fetch("/api/add", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(data)
+
+        });
+
+        const result = await response.json();
+
+        document.getElementById("form-message").innerText =
+            result.message || result.error;
+
+        if (response.ok) {
+
+            setTimeout(() => {
+
+                closeModal();
+
+                refreshDashboard();
+
+            }, 800);
+
+        }
+
+    } catch (error) {
+
+        document.getElementById("form-message").innerText =
+            "Registration failed. Check server.";
+
+    }
+
+});
+
+
+// Safe display for text
+function escapeHTML(value) {
+
+    const div = document.createElement("div");
+
+    div.textContent = value ?? "";
+
+    return div.innerHTML;
+
+}
+
+
+// Initial loading
+refreshDashboard();
+
+</script>
+
+</body>
+</html>
